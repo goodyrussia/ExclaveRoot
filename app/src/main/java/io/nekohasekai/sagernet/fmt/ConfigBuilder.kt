@@ -268,6 +268,10 @@ fun buildV2RayConfig(
         })) to it.resolveChain()
     }
 
+    // Exclave Root: always expose dokodemo for AsteriskNG-style capture
+    if (DataStore.serviceMode == Key.MODE_PROXY) {
+        DataStore.requireTransproxy = true
+    }
     val allowAccess = DataStore.allowAccess
     val bind = if (!forTest && allowAccess) "0.0.0.0" else LOCALHOST
 
@@ -452,14 +456,20 @@ fun buildV2RayConfig(
             if (DataStore.requireTransproxy) {
                 inbounds.add(InboundObject().apply {
                     tag = TAG_TRANS
-                    listen = bind
+                    // Root TPROXY/REDIRECT: listen all interfaces (AsteriskNG dokodemo)
+                    listen = if (DataStore.serviceMode == Key.MODE_PROXY) "0.0.0.0" else bind
                     port = DataStore.transproxyPort
                     protocol = "dokodemo-door"
                     settings = LazyInboundConfigurationObject(this,
                         DokodemoDoorInboundConfigurationObject().apply {
-                            network = "tcp"
+                            network = "tcp,udp"
                             followRedirect = true
                         })
+                    streamSettings = StreamSettingsObject().apply {
+                        sockopt = StreamSettingsObject.SockoptObject().apply {
+                            tproxy = "tproxy"
+                        }
+                    }
                     if (trafficSniffing || useFakeDns) {
                         sniffing = InboundObject.SniffingObject().apply {
                             enabled = true
@@ -482,9 +492,14 @@ fun buildV2RayConfig(
                         protocol = "dokodemo-door"
                         settings = LazyInboundConfigurationObject(this,
                             DokodemoDoorInboundConfigurationObject().apply {
-                                network = "tcp"
+                                network = "tcp,udp"
                                 followRedirect = true
                             })
+                        streamSettings = StreamSettingsObject().apply {
+                            sockopt = StreamSettingsObject.SockoptObject().apply {
+                                tproxy = "tproxy"
+                            }
+                        }
                         if (trafficSniffing || useFakeDns) {
                             sniffing = InboundObject.SniffingObject().apply {
                                 enabled = true

@@ -209,7 +209,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         get() = getLocalPort(Key.HTTP_PORT, 9080)
         set(value) = saveLocalPort(Key.HTTP_PORT, value)
     var transproxyPort: Int
-        get() = getLocalPort(Key.TRANSPROXY_PORT, 9200)
+        get() = getLocalPort(Key.TRANSPROXY_PORT, 12346)
         set(value) = saveLocalPort(Key.TRANSPROXY_PORT, value)
 
     fun initGlobal() {
@@ -268,7 +268,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var httpPassword by configurationStore.string(Key.HTTP_PASSWORD)
     var appendHttpProxy by configurationStore.boolean(Key.APPEND_HTTP_PROXY) { true }
     var httpProxyException by configurationStore.string(Key.HTTP_PROXY_EXCEPTION)
-    var requireTransproxy by configurationStore.boolean(Key.REQUIRE_TRANSPROXY)
+    var requireTransproxy by configurationStore.boolean(Key.REQUIRE_TRANSPROXY) { true }
     // var transproxyMode by configurationStore.stringToInt(Key.TRANSPROXY_MODE)
     var requireDnsInbound by configurationStore.boolean(Key.REQUIRE_DNS_INBOUND)
     var connectionTestURL by configurationStore.string(Key.CONNECTION_TEST_URL) { CONNECTION_TEST_URL }
