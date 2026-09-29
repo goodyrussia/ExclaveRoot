@@ -1,0 +1,14 @@
+*.aar
+*.jar
+.gradle
+.idea
+.kotlin
+.DS_Store
+build/
+local.properties
+/app/libs/
+/app/src/main/assets/exclave-core/*.dat
+jniLibs/
+!app/src/main/jniLibs/**/libhev-socks5-tproxy.so
+go.work
+go.work.sum
