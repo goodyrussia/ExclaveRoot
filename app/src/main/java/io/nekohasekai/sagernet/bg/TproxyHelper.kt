@@ -5,10 +5,7 @@ import android.os.Process
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.Logs
 
-/**
- * AsteriskNG-style: core already owns dokodemo TPROXY/redirect port; we only install iptables.
- * Order matches AsteriskNG RootModeRunner: start core → wait port → rules.
- */
+/** AsteriskNG-style: core owns dokodemo port; install iptables after core is up. */
 object TproxyHelper {
     fun start(context: Context) {
         if (!RootShell.available()) {
@@ -20,16 +17,16 @@ object TproxyHelper {
         var ready = false
         repeat(50) {
             Thread.sleep(100)
+            val hex = "%04X".format(port)
             val (_, out) = RootShell.execOut(
-                "(ss -lntu 2>/dev/null || netstat -lntu 2>/dev/null) | grep -E '[:.]$port\\s' | head -3",
+                "(ss -lntu 2>/dev/null || netstat -lntu 2>/dev/null) | grep -E '[:.]$port([[:space:]]|$)' | head -3",
             )
             if (out.contains(":$port") || out.contains(".$port")) {
                 ready = true
                 return@repeat
             }
-            // fallback: any LISTEN on port via /proc
             val (_, proc) = RootShell.execOut(
-                "grep -R \"$(printf '%04X' $port)\" /proc/net/tcp /proc/net/tcp6 2>/dev/null | head -1",
+                "grep -E ':$hex ' /proc/net/tcp /proc/net/tcp6 2>/dev/null | head -1",
             )
             if (proc.isNotBlank()) {
                 ready = true
