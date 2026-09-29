@@ -465,22 +465,11 @@ fun buildV2RayConfig(
                             network = "tcp,udp"
                             followRedirect = true
                         })
-                    streamSettings = StreamSettingsObject().apply {
-                        sockopt = StreamSettingsObject.SockoptObject().apply {
-                            tproxy = "tproxy"
-                        }
-                    }
-                    if (trafficSniffing || useFakeDns) {
-                        sniffing = InboundObject.SniffingObject().apply {
-                            enabled = true
-                            destOverride = when {
-                                useFakeDns && !trafficSniffing -> listOf("fakedns")
-                                useFakeDns -> listOf("fakedns", "http", "tls")
-                                else -> listOf("http", "tls")
-                            }
-                            metadataOnly = useFakeDns && !trafficSniffing
-                            routeOnly = !destinationOverride
-                        }
+                    // Always sniff on transparent inbound (REDIRECT path)
+                    sniffing = InboundObject.SniffingObject().apply {
+                        enabled = true
+                        destOverride = listOf("http", "tls", "quic")
+                        routeOnly = false
                     }
                     if (shouldDumpUID) dumpUID = true
                 })
@@ -495,11 +484,6 @@ fun buildV2RayConfig(
                                 network = "tcp,udp"
                                 followRedirect = true
                             })
-                        streamSettings = StreamSettingsObject().apply {
-                            sockopt = StreamSettingsObject.SockoptObject().apply {
-                                tproxy = "tproxy"
-                            }
-                        }
                         if (trafficSniffing || useFakeDns) {
                             sniffing = InboundObject.SniffingObject().apply {
                                 enabled = true
