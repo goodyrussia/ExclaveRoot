@@ -64,9 +64,15 @@ jobs:
           path: ~/.gradle
           key: gradle-${{ hashFiles('**/*.gradle.kts') }}
       - name: Gradle Build
+        env:
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          ALIAS_NAME: ${{ secrets.ALIAS_NAME }}
+          ALIAS_PASS: ${{ secrets.ALIAS_PASS }}
         run: |
           echo "sdk.dir=${ANDROID_HOME}" > local.properties
-          export LOCAL_PROPERTIES="${{ secrets.LOCAL_PROPERTIES }}"
+          echo "KEYSTORE_PASS=${KEYSTORE_PASS}" >> local.properties
+          echo "ALIAS_NAME=${ALIAS_NAME}" >> local.properties
+          echo "ALIAS_PASS=${ALIAS_PASS}" >> local.properties
           ./gradlew :app:downloadAssets
           ./gradlew :app:assembleOssRelease :app:assembleLegacyRelease
       - name: Upload Artifacts
